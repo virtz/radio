@@ -23,14 +23,14 @@ class _SplashScreenState extends State<SplashScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Color(0xFF241e20),
             image: DecorationImage(
-                image: AssetImage('assets/images/launcher.png'))),
+                image: AssetImage('assets/images/afroStar.jpg'))),
       ),
     );
   }
   onTap(){
-   Timer(Duration(seconds: 3), () {
+   Timer(Duration(seconds: 6), () {
    Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (BuildContext context) => Home()));
 });

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_radio_player/flutter_radio_player.dart';
-
-import '../main.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lottie/lottie.dart';
 
 class Home extends StatefulWidget {
   var playerState = FlutterRadioPlayer.flutter_radio_paused;
@@ -15,14 +15,14 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   FlutterRadioPlayer _flutterRadioPlayer = new FlutterRadioPlayer();
 
-  String url = "https://streamingv2.shoutcast.com/mapoly-radio";
+  String url = "http://streamingv2.shoutcast.com/mapoly2";
   bool isPlaying = false;
   bool visible = false;
 
-  int _currentIndex = 0;
-  final List<Widget> _children = [
-    new MyApp(),
-  ];
+  // int _currentIndex = 0;
+  // final List<Widget> _children = [
+  //   new MyApp(),
+  // ];
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _HomeState extends State<Home> {
   // }
   Future<void> initRadioService() async {
     try {
-      await _flutterRadioPlayer.init("Mapoly Radio", "Live", url, "false");
+      await _flutterRadioPlayer.init("AfriStar Radio", "Live", url, "false");
     } on PlatformException {
       print("Exception occurred while trying to register the services.");
     }
@@ -44,35 +44,47 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    // var size = MediaQuery.of(context).size;
+    double defaultScreenWidth = 400.0;
+    double defaultScreenHeight = 810.0;
+
+    // ScreenUtil.init(context, width: 750, height: 1334, allowFontScaling: false);
+    ScreenUtil.init(context,
+        width: defaultScreenWidth,
+        height: defaultScreenHeight,
+        allowFontScaling: true);
     return Scaffold(
-      backgroundColor: Colors.blueGrey.shade900,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Mapoly Radio'),
-        backgroundColor: Colors.blueGrey.shade900,
-        centerTitle: true,
-      ),
+          title: Text('AfriStar Radio', style: TextStyle(color: Colors.black)),
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          elevation: 0.0),
       body: Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           StreamBuilder(
               stream: _flutterRadioPlayer.isPlayingStream,
               initialData: widget.playerState,
-              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+              builder:
+                  (BuildContext context, AsyncSnapshot<String> snapshot) {
                 String returnData = snapshot.data;
                 print("object data: " + returnData);
                 switch (returnData) {
                   case FlutterRadioPlayer.flutter_radio_stopped:
-                    return RaisedButton(
-                        child: Center(child: Text("Start listening now")),
-                        onPressed: () async {
-                          await initRadioService();
-                        });
+                    return Center(
+                      child: RaisedButton(
+                          child: Center(child: Text("Start listening now")),
+                          onPressed: () async {
+                            await initRadioService();
+                          }),
+                    );
                     break;
                   case FlutterRadioPlayer.flutter_radio_loading:
                     return Center(
-                      child: CircularProgressIndicator(
-                          backgroundColor: Colors.white, strokeWidth: 2),
-                    );
+                        child: Container(
+                            child:
+                                Lottie.asset('assets/lottie/loader2.json')));
                   case FlutterRadioPlayer.flutter_radio_error:
                     return RaisedButton(
                         child: Text("Retry ?"),
@@ -82,46 +94,70 @@ class _HomeState extends State<Home> {
                     break;
                   default:
                     return Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          Expanded(
-                            flex: 6,
-                            child: Container(
-                              child: Icon(Icons.radio,
-                                  size: 250, color: Colors.white),
-                            ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Card(
+                           shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft:Radius.circular(30),
+                    topRight:Radius.circular(30)
+                  )),
+                          elevation: 10.0,
+                          shadowColor: Colors.yellow,
+                          
+                          child: Column(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 5,
+                                child:isPlaying? Container(
+                                    child: Lottie.asset(
+                                        'assets/lottie/home2.json')):Container(),
+                              ),
+                               Expanded(
+                                flex: 3,
+                                child:isPlaying? Container(
+                                    child: Lottie.asset(
+                                        'assets/lottie/wave.json',reverse: true,animate: true)):Container(),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      IconButton(
+                                          onPressed: () async {
+                                            print("button press data: " +
+                                                snapshot.data.toString());
+                                            await _flutterRadioPlayer
+                                                .playOrPause();
+                                                setState(() {
+                                                  isPlaying = true;
+                                                });
+                                          },
+                                          icon: snapshot.data ==
+                                                  FlutterRadioPlayer
+                                                      .flutter_radio_playing
+                                              ? Icon(Icons.pause_circle_outline,
+                                                  size: 50, color: Colors.black)
+                                              : Icon(Icons.play_circle_outline,
+                                                  size: 50,
+                                                  color: Colors.black)),
+                                      IconButton(
+                                          onPressed: () async {
+                                            await _flutterRadioPlayer.stop();
+                                            setState(() {
+                                              isPlaying = false;
+                                            });
+                                          },
+                                          icon: Icon(Icons.stop,
+                                              size: 50, color: Colors.black))
+                                    ]),
+                              ),
+                            ],
                           ),
-                          Expanded(
-                            flex: 3,
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  IconButton(
-                                    
-                                      onPressed: () async {
-                                        print("button press data: " +
-                                            snapshot.data.toString());
-                                        await _flutterRadioPlayer.playOrPause();
-                                      },
-                                      icon: snapshot.data ==
-                                              FlutterRadioPlayer
-                                                  .flutter_radio_playing
-                                          ? Icon(Icons.pause_circle_outline,
-                                              size: 50, color: Colors.white)
-                                          : Icon(Icons.play_circle_outline,
-        
-        
-                                              size: 50, color: Colors.white)),
-                                  IconButton(
-                                      onPressed: () async {
-                                        await _flutterRadioPlayer.stop();
-                                      },
-                                      icon: Icon(Icons.stop,
-                                          size: 50, color: Colors.white))
-                                ]),
-                          ),
-                        ],
+                        ),
                       ),
                     );
                     break;
@@ -138,6 +174,7 @@ class _HomeState extends State<Home> {
           // Text("Volume: " + (widget.volume * 100).toStringAsFixed(0))
         ],
       ),
+
       // bottomNavigationBar: new BottomNavigationBar(
       //     currentIndex: this._currentIndex,
       //     onTap: (int index) {
